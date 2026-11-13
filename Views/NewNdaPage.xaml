@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Discretion.ViewModels"
+             xmlns:models="clr-namespace:Discretion.Models"
+             x:Class="Discretion.Views.NewNdaPage"
+             x:DataType="vm:NewNdaViewModel"
+             Title="New Agreement">
+
+    <Shell.BackButtonBehavior>
+        <BackButtonBehavior Command="{Binding BackCommand}" />
+    </Shell.BackButtonBehavior>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Step header -->
+        <VerticalStackLayout BackgroundColor="{StaticResource Navy}" Padding="20,4,20,18" Spacing="4">
+            <Label Text="{Binding StepLabel}" Style="{StaticResource Overline}" />
+            <Label Text="{Binding StepTitle}" FontFamily="{StaticResource SerifFont}" FontSize="24" FontAttributes="Bold" TextColor="White" />
+            <Label Text="{Binding StepSubtitle}" FontSize="13" TextColor="{StaticResource GoldLight}" />
+            <ProgressBar Progress="{Binding Progress}" ProgressColor="{StaticResource Gold}" BackgroundColor="{StaticResource NavyLight}" Margin="0,10,0,0" />
+        </VerticalStackLayout>
+
+        <Grid Grid.Row="1">
+
+            <!-- STEP 1: Template -->
+            <CollectionView IsVisible="{Binding IsStep1}" ItemsSource="{Binding Templates}" SelectionMode="Single"
+                            SelectedItem="{Binding SelectedTemplate, Mode=TwoWay}" Margin="16,0">
+                <CollectionView.Header>
+                    <BoxView HeightRequest="14" Color="Transparent" BackgroundColor="Transparent" />
+                </CollectionView.Header>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:NdaTemplate">
+                        <Grid Padding="0,0,0,10">
+                            <Border x:Name="Card" Style="{StaticResource Card}" Padding="14">
+                                <VisualStateManager.VisualStateGroups>
+                                    <VisualStateGroupList>
+                                        <VisualStateGroup x:Name="CommonStates">
+                                            <VisualState x:Name="Normal" />
+                                            <VisualState x:Name="Selected">
+                                                <VisualState.Setters>
+                                                    <Setter Property="Stroke" Value="{StaticResource Gold}" />
+                                                    <Setter Property="StrokeThickness" Value="2" />
+                                                    <Setter Property="BackgroundColor" Value="#FBF7EE" />
+                                                </VisualState.Setters>
+                                            </VisualState>
+                                        </VisualStateGroup>
+                                    </VisualStateGroupList>
+                                </VisualStateManager.VisualStateGroups>
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                    <Border WidthRequest="46" HeightRequest="46" StrokeShape="Ellipse" Stroke="{StaticResource Gold}"
+                                            StrokeThickness="1" BackgroundColor="{StaticResource Navy}" VerticalOptions="Start">
+                                        <Label Text="{Binding Monogram}" FontFamily="{StaticResource SerifFont}" FontAttributes="Bold" FontSize="15"
+                                               TextColor="{StaticResource Gold}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Border>
+                                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                        <Label Text="{Binding Category, StringFormat='{0}'}" Style="{StaticResource Overline}" FontSize="10" />
+                                        <Label Text="{Binding Title}" Style="{StaticResource CardTitle}" />
+                                        <Label Text="{Binding Summary}" Style="{StaticResource Caption}" FontSize="13" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <ScrollView IsVisible="{Binding IsStep1, Converter={StaticResource InvertedBool}}">
+                <Grid Padding="20,20,20,24">
+
+                    <!-- STEP 2: Term -->
+                    <VerticalStackLayout IsVisible="{Binding IsStep2}" Spacing="12">
+                        <Label Text="COMMON TERMS" Style="{StaticResource Overline}" />
+                        <FlexLayout Wrap="Wrap">
+                            <Button Text="6 months" Style="{StaticResource ChipButton}" Command="{Binding SetTermCommand}" CommandParameter="6M" />
+                            <Button Text="1 year" Style="{StaticResource ChipButton}" Command="{Binding SetTermCommand}" CommandParameter="1Y" />
+                            <Button Text="2 years" Style="{StaticResource ChipButton}" Command="{Binding SetTermCommand}" CommandParameter="2Y" />
+                            <Button Text="5 years" Style="{StaticResource ChipButton}" Command="{Binding SetTermCommand}" CommandParameter="5Y" />
+                            <Button Text="10 years" Style="{StaticResource ChipButton}" Command="{Binding SetTermCommand}" CommandParameter="10Y" />
+                            <Button Text="25 years" Style="{StaticResource ChipButton}" Command="{Binding SetTermCommand}" CommandParameter="25Y" />
+                        </FlexLayout>
+
+                        <Label Text="CUSTOM TERM" Style="{StaticResource Overline}" Margin="0,8,0,0" />
+                        <Border Style="{StaticResource Card}">
+                            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="10">
+                                <Label Text="{Binding TermLength, StringFormat='{0:0}'}" FontFamily="{StaticResource SerifFont}" FontSize="40"
+                                       FontAttributes="Bold" TextColor="{StaticResource Navy}" VerticalOptions="Center" />
+                                <Stepper Grid.Column="1" Minimum="1" Maximum="99" Increment="1" Value="{Binding TermLength}" VerticalOptions="Center" />
+                                <Border Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource InputFrame}">
+                                    <Picker Title="Unit" ItemsSource="{Binding TermUnits}" SelectedIndex="{Binding TermUnitIndex}" />
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <Border Style="{StaticResource Card}" BackgroundColor="#FBF7EE" Stroke="{StaticResource GoldLight}">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="SELECTED TERM" Style="{StaticResource Overline}" />
+                                <Label Text="{Binding TermDescription}" Style="{StaticResource CardTitle}" />
+                                <Label Text="{Binding ExpirationDescription}" Style="{StaticResource Caption}" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- STEP 3: Survival -->
+                    <VerticalStackLayout IsVisible="{Binding IsStep3}" Spacing="14">
+                        <Border Style="{StaticResource Card}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SetSurvivalCommand}" CommandParameter="yes" />
+                            </Border.GestureRecognizers>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding SurvivesExpiration}" Value="True">
+                                    <Setter Property="Stroke" Value="{StaticResource Gold}" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                    <Setter Property="BackgroundColor" Value="#FBF7EE" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="Yes — Obligations Survive" Style="{StaticResource CardTitle}" />
+                                <Label Style="{StaticResource Caption}" FontSize="13"
+                                       Text="The Receiving Party must maintain confidentiality indefinitely, even after the Term expires. Recommended for matters that will never be funny." />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Style="{StaticResource Card}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SetSurvivalCommand}" CommandParameter="no" />
+                            </Border.GestureRecognizers>
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding SurvivesExpiration}" Value="False">
+                                    <Setter Property="Stroke" Value="{StaticResource Gold}" />
+                                    <Setter Property="StrokeThickness" Value="2" />
+                                    <Setter Property="BackgroundColor" Value="#FBF7EE" />
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <VerticalStackLayout Spacing="6">
+                                <Label Text="No — Obligations End at Expiration" Style="{StaticResource CardTitle}" />
+                                <Label Style="{StaticResource Caption}" FontSize="13"
+                                       Text="Once the Term expires, the Receiving Party is released and may discuss the matter freely, subject to common decency." />
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- STEP 4: Receiving party -->
+                    <VerticalStackLayout IsVisible="{Binding IsStep4}">
+                        <Label Text="Full legal name" Style="{StaticResource FieldLabel}" />
+                        <Border Style="{StaticResource InputFrame}">
+                            <Entry Text="{Binding ReceivingName}" Placeholder="e.g. Margaret A. O'Brien" Keyboard="Text" ReturnType="Next" />
+                        </Border>
+                        <Label Text="Mobile phone" Style="{StaticResource FieldLabel}" />
+                        <Border Style="{StaticResource InputFrame}">
+                            <Entry Text="{Binding ReceivingPhone}" Placeholder="(555) 555-0100" Keyboard="Telephone" ReturnType="Next" />
+                        </Border>
+                        <Label Text="Email address" Style="{StaticResource FieldLabel}" />
+                        <Border Style="{StaticResource InputFrame}">
+                            <Entry Text="{Binding ReceivingEmail}" Placeholder="name@example.com" Keyboard="Email" ReturnType="Next" />
+                        </Border>
+                        <Label Text="Street address" Style="{StaticResource FieldLabel}" />
+                        <Border Style="{StaticResource InputFrame}">
+                            <Entry Text="{Binding ReceivingStreet}" Placeholder="123 Main Street, Apt 4" ReturnType="Next" />
+                        </Border>
+                        <Grid ColumnDefinitions="2*,*,*" ColumnSpacing="10">
+                            <VerticalStackLayout>
+                                <Label Text="City" Style="{StaticResource FieldLabel}" />
+                                <Border Style="{StaticResource InputFrame}">
+                                    <Entry Text="{Binding ReceivingCity}" Placeholder="City" ReturnType="Next" />
+                                </Border>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1">
+                                <Label Text="State" Style="{StaticResource FieldLabel}" />
+                                <Border Style="{StaticResource InputFrame}">
+                                    <Entry Text="{Binding ReceivingRegion}" Placeholder="NY" MaxLength="20" ReturnType="Next" />
+                                </Border>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="2">
+                                <Label Text="ZIP" Style="{StaticResource FieldLabel}" />
+                                <Border Style="{StaticResource InputFrame}">
+                                    <Entry Text="{Binding ReceivingPostalCode}" Placeholder="10001" Keyboard="Numeric" MaxLength="10" ReturnType="Done" />
+                                </Border>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+
+                    <!-- STEP 5: Governing law -->
+                    <VerticalStackLayout IsVisible="{Binding IsStep5}" Spacing="12">
+                        <Label Text="Jurisdiction" Style="{StaticResource FieldLabel}" />
+                        <Border Style="{StaticResource InputFrame}">
+                            <Picker Title="Select a state" ItemsSource="{Binding States}" SelectedItem="{Binding GoverningState}" />
+                        </Border>
+                        <Label Style="{StaticResource Caption}" FontSize="13"
+                               Text="The selected jurisdiction's laws will govern the interpretation and enforcement of this Agreement, and its courts will have exclusive venue over any dispute." />
+                    </VerticalStackLayout>
+
+                    <!-- STEP 6: Effective date -->
+                    <VerticalStackLayout IsVisible="{Binding IsStep6}" Spacing="12">
+                        <Label Text="Effective date" Style="{StaticResource FieldLabel}" />
+                        <Border Style="{StaticResource InputFrame}">
+                            <DatePicker Date="{Binding EffectiveDate}" Format="MMMM d, yyyy" />
+                        </Border>
+                        <HorizontalStackLayout>
+                            <Button Text="Today" Style="{StaticResource ChipButton}" Command="{Binding SetTodayCommand}" />
+                        </HorizontalStackLayout>
+                        <Border Style="{StaticResource Card}" BackgroundColor="#FBF7EE" Stroke="{StaticResource GoldLight}">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="TERM" Style="{StaticResource Overline}" />
+                                <Label Text="{Binding TermDescription}" Style="{StaticResource CardTitle}" />
+                                <Label Text="{Binding ExpirationDescription}" Style="{StaticResource Caption}" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- STEP 7: Review -->
+                    <VerticalStackLayout IsVisible="{Binding IsStep7}" Spacing="12">
+                        <Border Style="{StaticResource Card}">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="DISCLOSING PARTY (YOU)" Style="{StaticResource Overline}" />
+                                <Label Text="{Binding DisclosingParty.Name}" Style="{StaticResource CardTitle}" />
+                                <Label Text="{Binding DisclosingParty.Email}" Style="{StaticResource Caption}" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Style="{StaticResource Card}" Padding="16,6">
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Summary}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ReviewItem">
+                                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" Padding="0,10,0,0">
+                                            <Label Text="{Binding Label}" Style="{StaticResource Overline}" FontSize="10" />
+                                            <Label Grid.Row="1" Text="{Binding Value}" Style="{StaticResource Body}" />
+                                            <Button Grid.Column="1" Grid.RowSpan="2" Text="Edit" Style="{StaticResource LinkButton}" VerticalOptions="Center"
+                                                    Command="{Binding GoToStepCommand, Source={RelativeSource AncestorType={x:Type vm:NewNdaViewModel}}, x:DataType=vm:NewNdaViewModel}"
+                                                    CommandParameter="{Binding Step}" />
+                                            <BoxView Grid.Row="2" Grid.ColumnSpan="2" Style="{StaticResource Hairline}" Margin="0,10,0,0" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </Border>
+                        <Label Style="{StaticResource Caption}" FontSize="12"
+                               Text="Upon saving, the Agreement will be generated on this device and both parties will be prompted to sign." />
+                    </VerticalStackLayout>
+                </Grid>
+            </ScrollView>
+        </Grid>
+
+        <!-- Footer -->
+        <VerticalStackLayout Grid.Row="2" BackgroundColor="{StaticResource Paper}" Padding="16,10,16,16" Spacing="8">
+            <BoxView Style="{StaticResource Hairline}" Margin="-16,-10,-16,0" />
+            <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" FontSize="13"
+                   IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNull}}" />
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                <Button Text="Back" Style="{StaticResource OutlineButton}" Command="{Binding BackCommand}" WidthRequest="100" />
+                <Button Grid.Column="1" Text="{Binding ContinueText}" Style="{StaticResource PrimaryButton}" Command="{Binding NextCommand}" />
+            </Grid>
+            <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HeightRequest="24" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

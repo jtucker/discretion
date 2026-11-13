@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Discretion.Controls"
+             x:Class="Discretion.Views.SignaturePage"
+             Title="Execute Agreement">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <VerticalStackLayout BackgroundColor="{StaticResource Navy}" Padding="20,28,20,18" Spacing="4">
+            <Label x:Name="RoleLabel" Style="{StaticResource Overline}" />
+            <Label x:Name="NameLabel" FontFamily="{StaticResource SerifFont}" FontSize="24" FontAttributes="Bold" TextColor="White" />
+            <Label x:Name="ReferenceLabel" FontSize="13" TextColor="{StaticResource GoldLight}" />
+        </VerticalStackLayout>
+
+        <Grid Grid.Row="1" RowDefinitions="Auto,Auto,*,Auto" Padding="20,16,20,0" RowSpacing="12">
+            <Label x:Name="AttestationLabel" Style="{StaticResource Body}" FontSize="13" />
+
+            <Grid Grid.Row="1" ColumnDefinitions="Auto,*" ColumnSpacing="6">
+                <CheckBox x:Name="ConsentBox" Color="{StaticResource Navy}" VerticalOptions="Start" CheckedChanged="OnConsentChanged" />
+                <Label Grid.Column="1" Style="{StaticResource Caption}" FontSize="12" VerticalOptions="Center"
+                       Text="I consent to conduct this transaction electronically and adopt the signature below as my legal signature.">
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnConsentLabelTapped" />
+                    </Label.GestureRecognizers>
+                </Label>
+            </Grid>
+
+            <Border Grid.Row="2" Style="{StaticResource Card}" Padding="0" MinimumHeightRequest="180" Stroke="{StaticResource Gold}">
+                <Grid>
+                    <Label Text="Sign here" Style="{StaticResource Caption}" x:Name="PlaceholderLabel"
+                           HorizontalOptions="Center" VerticalOptions="Center" FontSize="16" Opacity="0.6" />
+                    <Label Text="X" FontFamily="{StaticResource SerifFont}" FontSize="22" TextColor="{StaticResource Muted}"
+                           Margin="16,0,0,30" VerticalOptions="End" />
+                    <BoxView Style="{StaticResource Hairline}" Color="{StaticResource Navy}" Margin="16,0,16,30" VerticalOptions="End" />
+                    <controls:SignaturePad x:Name="Pad" SignatureChanged="OnSignatureChanged" />
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="3" ColumnDefinitions="*,Auto">
+                <Button Text="Read the full Agreement" Style="{StaticResource LinkButton}" HorizontalOptions="Start" Clicked="OnReviewClicked" />
+                <Button Grid.Column="1" Text="Clear" Style="{StaticResource LinkButton}" Clicked="OnClearClicked" />
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Row="2" ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="16,10,16,20" BackgroundColor="{StaticResource Paper}">
+            <Button Text="Cancel" Style="{StaticResource OutlineButton}" WidthRequest="110" Clicked="OnCancelClicked" />
+            <Button Grid.Column="1" x:Name="AdoptButton" Text="Adopt &amp; Sign" Style="{StaticResource PrimaryButton}"
+                    IsEnabled="False" Clicked="OnAdoptClicked" />
+        </Grid>
+    </Grid>
+</ContentPage>

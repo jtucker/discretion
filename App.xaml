@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Application xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:converters="clr-namespace:Discretion.Converters"
+             x:Class="Discretion.App">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles/Colors.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+                <ResourceDictionary Source="Resources/Styles/AppStyles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <converters:InvertedBoolConverter x:Key="InvertedBool" />
+            <converters:IsNotNullConverter x:Key="IsNotNull" />
+            <converters:IsNullConverter x:Key="IsNull" />
+            <converters:StatusToColorConverter x:Key="StatusForeground" />
+            <converters:StatusToColorConverter x:Key="StatusBackground" Background="True" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

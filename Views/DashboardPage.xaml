@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Discretion.ViewModels"
+             xmlns:models="clr-namespace:Discretion.Models"
+             x:Class="Discretion.Views.DashboardPage"
+             x:DataType="vm:DashboardViewModel"
+             Title="Discretion">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Your Details" Command="{Binding OpenProfileCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- Masthead -->
+        <Grid BackgroundColor="{StaticResource Navy}" Padding="20,8,20,24" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="4">
+            <HorizontalStackLayout Spacing="12">
+                <Border WidthRequest="44" HeightRequest="44" StrokeShape="Ellipse" Stroke="{StaticResource Gold}" StrokeThickness="1.5"
+                        BackgroundColor="Transparent">
+                    <Label Text="D" FontFamily="{StaticResource SerifFont}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Gold}"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+                <VerticalStackLayout VerticalOptions="Center">
+                    <Label Text="DISCRETION" FontFamily="{StaticResource SerifFont}" FontSize="20" FontAttributes="Bold"
+                           TextColor="White" CharacterSpacing="3" />
+                    <Label Text="Confidentiality Agreements" FontSize="11" TextColor="{StaticResource GoldLight}" CharacterSpacing="1" />
+                </VerticalStackLayout>
+            </HorizontalStackLayout>
+            <Label Grid.Row="1" Text="{Binding Greeting}" TextColor="{StaticResource GoldLight}" FontSize="13" Margin="0,18,0,0" />
+
+            <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,10,0,14">
+                <Border StrokeShape="RoundRectangle 10" Stroke="{StaticResource NavyLight}" BackgroundColor="{StaticResource NavyLight}" Padding="14,10">
+                    <VerticalStackLayout>
+                        <Label Text="{Binding PendingCount}" FontFamily="{StaticResource SerifFont}" FontSize="26" FontAttributes="Bold" TextColor="White" />
+                        <Label Text="Awaiting signature" FontSize="12" TextColor="{StaticResource GoldLight}" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Grid.Column="1" StrokeShape="RoundRectangle 10" Stroke="{StaticResource NavyLight}" BackgroundColor="{StaticResource NavyLight}" Padding="14,10">
+                    <VerticalStackLayout>
+                        <Label Text="{Binding ExecutedCount}" FontFamily="{StaticResource SerifFont}" FontSize="26" FontAttributes="Bold" TextColor="White" />
+                        <Label Text="Fully executed" FontSize="12" TextColor="{StaticResource GoldLight}" />
+                    </VerticalStackLayout>
+                </Border>
+            </Grid>
+
+            <Button Grid.Row="3" Text="+  Create New NDA" Style="{StaticResource GoldButton}" Command="{Binding CreateNewCommand}"
+                    SemanticProperties.Hint="Starts the new agreement wizard" />
+        </Grid>
+
+        <!-- Agreement register -->
+        <CollectionView Grid.Row="1" ItemsSource="{Binding Agreements}" SelectionMode="None" Margin="16,0">
+            <CollectionView.Header>
+                <Label Text="AGREEMENT REGISTER" Style="{StaticResource Overline}" Margin="4,20,0,10" />
+            </CollectionView.Header>
+            <CollectionView.EmptyView>
+                <VerticalStackLayout Padding="24,40" Spacing="8">
+                    <Label Text="No agreements on file" Style="{StaticResource CardTitle}" HorizontalTextAlignment="Center" />
+                    <Label Text="Matters requiring discretion will appear here once an agreement has been created."
+                           Style="{StaticResource Caption}" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="models:Agreement">
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,10" Padding="16,14">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding OpenCommand, Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, x:DataType=vm:DashboardViewModel}"
+                                                  CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="3">
+                            <Label Text="{Binding ReferenceNumber}" Style="{StaticResource Overline}" />
+                            <Border Grid.Column="1" Grid.RowSpan="2" VerticalOptions="Start" StrokeShape="RoundRectangle 10" StrokeThickness="0"
+                                    Padding="10,3" BackgroundColor="{Binding Status, Converter={StaticResource StatusBackground}}">
+                                <Label Text="{Binding StatusText}" FontSize="11" FontFamily="OpenSansSemibold"
+                                       TextColor="{Binding Status, Converter={StaticResource StatusForeground}}" />
+                            </Border>
+                            <Label Grid.Row="1" Text="{Binding TemplateTitle}" Style="{StaticResource CardTitle}" />
+                            <Label Grid.Row="2" Grid.ColumnSpan="2" Style="{StaticResource Caption}">
+                                <Label.FormattedText>
+                                    <FormattedString>
+                                        <Span Text="Receiving Party: " />
+                                        <Span Text="{Binding ReceivingParty.Name}" FontFamily="OpenSansSemibold" />
+                                        <Span Text="  ·  Effective " />
+                                        <Span Text="{Binding EffectiveDate, StringFormat='{0:MMM d, yyyy}'}" />
+                                    </FormattedString>
+                                </Label.FormattedText>
+                            </Label>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.Footer>
+                <Label Text="All agreements and documents are stored exclusively on this device."
+                       Style="{StaticResource Caption}" FontSize="11" HorizontalTextAlignment="Center" Margin="0,8,0,24" />
+            </CollectionView.Footer>
+        </CollectionView>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:Discretion.ViewModels"
+             xmlns:controls="clr-namespace:Discretion.Controls"
+             x:Class="Discretion.Views.AgreementPage"
+             x:DataType="vm:AgreementViewModel"
+             Title="{Binding Agreement.ReferenceNumber}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Delete" Order="Secondary" Command="{Binding DeleteCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="16,0,16,28" Spacing="14">
+
+                <!-- Summary -->
+                <Border Style="{StaticResource Card}" Margin="0,16,0,0" Padding="18">
+                    <VerticalStackLayout Spacing="6">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="{Binding Agreement.ReferenceNumber}" Style="{StaticResource Overline}" VerticalOptions="Center" />
+                            <Border Grid.Column="1" StrokeShape="RoundRectangle 10" StrokeThickness="0" Padding="10,3"
+                                    BackgroundColor="{Binding Agreement.Status, Converter={StaticResource StatusBackground}}">
+                                <Label Text="{Binding Agreement.StatusText}" FontSize="11" FontFamily="OpenSansSemibold"
+                                       TextColor="{Binding Agreement.Status, Converter={StaticResource StatusForeground}}" />
+                            </Border>
+                        </Grid>
+                        <Label Text="Non-Disclosure Agreement" Style="{StaticResource Caption}" />
+                        <Label Text="{Binding Agreement.TemplateTitle}" Style="{StaticResource Title}" />
+                        <BoxView Style="{StaticResource Hairline}" Margin="0,8" />
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="2">
+                            <Label Text="EFFECTIVE" Style="{StaticResource Overline}" FontSize="10" />
+                            <Label Grid.Column="1" Text="EXPIRES" Style="{StaticResource Overline}" FontSize="10" />
+                            <Label Grid.Row="1" Text="{Binding EffectiveText}" Style="{StaticResource Body}" />
+                            <Label Grid.Row="1" Grid.Column="1" Text="{Binding ExpirationText}" Style="{StaticResource Body}" />
+                            <Label Grid.Row="2" Text="GOVERNING LAW" Style="{StaticResource Overline}" FontSize="10" Margin="0,10,0,0" />
+                            <Label Grid.Row="2" Grid.Column="1" Text="CONFIDENTIALITY" Style="{StaticResource Overline}" FontSize="10" Margin="0,10,0,0" />
+                            <Label Grid.Row="3" Text="{Binding GoverningLawText}" Style="{StaticResource Body}" />
+                            <Label Grid.Row="3" Grid.Column="1" Text="{Binding SurvivalText}" Style="{StaticResource Body}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="EXECUTION" Style="{StaticResource Overline}" Margin="4,6,0,0" />
+
+                <!-- Disclosing party -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="DISCLOSING PARTY" Style="{StaticResource Overline}" FontSize="10" />
+                        <Label Text="{Binding Agreement.DisclosingParty.Name}" Style="{StaticResource CardTitle}" />
+                        <Label Text="{Binding DisclosingStatus}" Style="{StaticResource Caption}" />
+                        <Grid IsVisible="{Binding Agreement.DisclosingSignature, Converter={StaticResource IsNotNull}}" HeightRequest="70" Margin="0,6,0,0">
+                            <controls:SignatureView Signature="{Binding Agreement.DisclosingSignature}" HeightRequest="60" VerticalOptions="Start" />
+                            <BoxView Style="{StaticResource Hairline}" Color="{StaticResource Navy}" VerticalOptions="End" />
+                        </Grid>
+                        <Button Text="Sign as Disclosing Party" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
+                                Command="{Binding SignDisclosingCommand}"
+                                IsVisible="{Binding Agreement.DisclosingSignature, Converter={StaticResource IsNull}}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Receiving party -->
+                <Border Style="{StaticResource Card}">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="RECEIVING PARTY" Style="{StaticResource Overline}" FontSize="10" />
+                        <Label Text="{Binding Agreement.ReceivingParty.Name}" Style="{StaticResource CardTitle}" />
+                        <Label Text="{Binding Agreement.ReceivingParty.Email}" Style="{StaticResource Caption}" />
+                        <Label Text="{Binding Agreement.ReceivingParty.Phone}" Style="{StaticResource Caption}" />
+                        <Label Text="{Binding Agreement.ReceivingParty.FormattedAddress}" Style="{StaticResource Caption}" />
+                        <Label Text="{Binding ReceivingStatus}" Style="{StaticResource Caption}" FontFamily="OpenSansSemibold" Margin="0,4,0,0" />
+                        <Grid IsVisible="{Binding Agreement.ReceivingSignature, Converter={StaticResource IsNotNull}}" HeightRequest="70" Margin="0,6,0,0">
+                            <controls:SignatureView Signature="{Binding Agreement.ReceivingSignature}" HeightRequest="60" VerticalOptions="Start" />
+                            <BoxView Style="{StaticResource Hairline}" Color="{StaticResource Navy}" VerticalOptions="End" />
+                        </Grid>
+                        <Button Text="Sign as Receiving Party" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
+                                Command="{Binding SignReceivingCommand}"
+                                IsVisible="{Binding Agreement.ReceivingSignature, Converter={StaticResource IsNull}}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="DOCUMENT" Style="{StaticResource Overline}" Margin="4,6,0,0" />
+                <Button Text="View Agreement" Style="{StaticResource GoldButton}" Command="{Binding ViewDocumentCommand}" />
+                <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                    <Button Text="Share PDF" Style="{StaticResource OutlineButton}" Command="{Binding ShareCommand}" />
+                    <Button Grid.Column="1" Text="Email" Style="{StaticResource OutlineButton}" Command="{Binding EmailCommand}" />
+                    <Button Grid.Column="2" Text="Text" Style="{StaticResource OutlineButton}" Command="{Binding TextCommand}" />
+                </Grid>
+                <Label Style="{StaticResource Caption}" FontSize="11" HorizontalTextAlignment="Center"
+                       Text="The PDF is regenerated on this device each time a party signs." />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Grid IsVisible="{Binding IsBusy}" BackgroundColor="#66000000">
+            <ActivityIndicator IsRunning="{Binding IsBusy}" Color="White" HorizontalOptions="Center" VerticalOptions="Center" />
+        </Grid>
+    </Grid>
+</ContentPage>
