@@ -5,15 +5,15 @@
     <!-- Note: For Android please see also Platforms\Android\Resources\values\colors.xml -->
 
     <!-- Discretion brand palette -->
-    <Color x:Key="Navy">#0B1F3A</Color>
-    <Color x:Key="NavyLight">#1C3557</Color>
-    <Color x:Key="Gold">#B08D57</Color>
-    <Color x:Key="GoldLight">#E9DDC7</Color>
-    <Color x:Key="Parchment">#F6F3EC</Color>
-    <Color x:Key="Paper">#FFFFFF</Color>
-    <Color x:Key="Ink">#1A1D24</Color>
-    <Color x:Key="Muted">#646B78</Color>
-    <Color x:Key="Hairline">#DDD5C4</Color>
+    <Color x:Key="Navy">#171715</Color>
+    <Color x:Key="NavyLight">#302F2B</Color>
+    <Color x:Key="Gold">#171715</Color>
+    <Color x:Key="GoldLight">#77736D</Color>
+    <Color x:Key="Parchment">#F0EEE8</Color>
+    <Color x:Key="Paper">#FBF9F3</Color>
+    <Color x:Key="Ink">#171715</Color>
+    <Color x:Key="Muted">#6F6C66</Color>
+    <Color x:Key="Hairline">#E5E1D8</Color>
     <Color x:Key="SignatureInk">#10216B</Color>
     <Color x:Key="Success">#2E6B4F</Color>
     <Color x:Key="SuccessLight">#E1EFE7</Color>
@@ -22,18 +22,18 @@
     <Color x:Key="Danger">#9B2C2C</Color>
 
     <!-- Template keys (used by Styles.xaml) mapped to the brand palette -->
-    <Color x:Key="Primary">#0B1F3A</Color>
-    <Color x:Key="PrimaryDark">#0B1F3A</Color>
+    <Color x:Key="Primary">#171715</Color>
+    <Color x:Key="PrimaryDark">#171715</Color>
     <Color x:Key="PrimaryDarkText">#FFFFFF</Color>
-    <Color x:Key="Secondary">#E9DDC7</Color>
-    <Color x:Key="SecondaryDarkText">#B08D57</Color>
-    <Color x:Key="Tertiary">#1C3557</Color>
+    <Color x:Key="Secondary">#E5E1D8</Color>
+    <Color x:Key="SecondaryDarkText">#171715</Color>
+    <Color x:Key="Tertiary">#302F2B</Color>
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
-    <Color x:Key="Magenta">#B08D57</Color>
-    <Color x:Key="MidnightBlue">#0B1F3A</Color>
-    <Color x:Key="OffBlack">#1A1D24</Color>
+    <Color x:Key="Magenta">#171715</Color>
+    <Color x:Key="MidnightBlue">#171715</Color>
+    <Color x:Key="OffBlack">#171715</Color>
 
     <Color x:Key="Gray100">#E1E1E1</Color>
     <Color x:Key="Gray200">#C8C8C8</Color>

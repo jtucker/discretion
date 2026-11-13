@@ -6,10 +6,10 @@
              Title="Execute Agreement">
 
     <Grid RowDefinitions="Auto,*,Auto">
-        <VerticalStackLayout BackgroundColor="{StaticResource Navy}" Padding="20,28,20,18" Spacing="4">
+        <VerticalStackLayout BackgroundColor="{StaticResource Parchment}" Padding="20,20,20,18" Spacing="4">
             <Label x:Name="RoleLabel" Style="{StaticResource Overline}" />
-            <Label x:Name="NameLabel" FontFamily="{StaticResource SerifFont}" FontSize="24" FontAttributes="Bold" TextColor="White" />
-            <Label x:Name="ReferenceLabel" FontSize="13" TextColor="{StaticResource GoldLight}" />
+            <Label x:Name="NameLabel" FontFamily="{StaticResource SerifFont}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Ink}" />
+            <Label x:Name="ReferenceLabel" FontSize="13" TextColor="{StaticResource Muted}" />
         </VerticalStackLayout>
 
         <Grid Grid.Row="1" RowDefinitions="Auto,Auto,*,Auto" Padding="20,16,20,0" RowSpacing="12">
@@ -25,7 +25,7 @@
                 </Label>
             </Grid>
 
-            <Border Grid.Row="2" Style="{StaticResource Card}" Padding="0" MinimumHeightRequest="180" Stroke="{StaticResource Gold}">
+            <Border Grid.Row="2" Style="{StaticResource Card}" Padding="0" MinimumHeightRequest="180">
                 <Grid>
                     <Label Text="Sign here" Style="{StaticResource Caption}" x:Name="PlaceholderLabel"
                            HorizontalOptions="Center" VerticalOptions="Center" FontSize="16" Opacity="0.6" />
@@ -42,7 +42,7 @@
             </Grid>
         </Grid>
 
-        <Grid Grid.Row="2" ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="16,10,16,20" BackgroundColor="{StaticResource Paper}">
+        <Grid Grid.Row="2" ColumnDefinitions="Auto,*" ColumnSpacing="10" Padding="16,10,16,20" BackgroundColor="{StaticResource Parchment}">
             <Button Text="Cancel" Style="{StaticResource OutlineButton}" WidthRequest="110" Clicked="OnCancelClicked" />
             <Button Grid.Column="1" x:Name="AdoptButton" Text="Adopt &amp; Sign" Style="{StaticResource PrimaryButton}"
                     IsEnabled="False" Clicked="OnAdoptClicked" />

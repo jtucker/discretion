@@ -14,11 +14,11 @@
     <Grid RowDefinitions="Auto,*,Auto">
 
         <!-- Step header -->
-        <VerticalStackLayout BackgroundColor="{StaticResource Navy}" Padding="20,4,20,18" Spacing="4">
+        <VerticalStackLayout BackgroundColor="{StaticResource Parchment}" Padding="20,14,20,18" Spacing="4">
             <Label Text="{Binding StepLabel}" Style="{StaticResource Overline}" />
-            <Label Text="{Binding StepTitle}" FontFamily="{StaticResource SerifFont}" FontSize="24" FontAttributes="Bold" TextColor="White" />
-            <Label Text="{Binding StepSubtitle}" FontSize="13" TextColor="{StaticResource GoldLight}" />
-            <ProgressBar Progress="{Binding Progress}" ProgressColor="{StaticResource Gold}" BackgroundColor="{StaticResource NavyLight}" Margin="0,10,0,0" />
+            <Label Text="{Binding StepTitle}" FontFamily="{StaticResource SerifFont}" FontSize="24" FontAttributes="Bold" TextColor="{StaticResource Ink}" />
+            <Label Text="{Binding StepSubtitle}" FontSize="13" TextColor="{StaticResource Muted}" />
+            <ProgressBar Progress="{Binding Progress}" ProgressColor="{StaticResource Ink}" Margin="0,10,0,0" />
         </VerticalStackLayout>
 
         <Grid Grid.Row="1">
@@ -41,17 +41,17 @@
                                                 <VisualState.Setters>
                                                     <Setter Property="Stroke" Value="{StaticResource Gold}" />
                                                     <Setter Property="StrokeThickness" Value="2" />
-                                                    <Setter Property="BackgroundColor" Value="#FBF7EE" />
+                                                    <Setter Property="BackgroundColor" Value="{StaticResource Paper}" />
                                                 </VisualState.Setters>
                                             </VisualState>
                                         </VisualStateGroup>
                                     </VisualStateGroupList>
                                 </VisualStateManager.VisualStateGroups>
                                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
-                                    <Border WidthRequest="46" HeightRequest="46" StrokeShape="Ellipse" Stroke="{StaticResource Gold}"
-                                            StrokeThickness="1" BackgroundColor="{StaticResource Navy}" VerticalOptions="Start">
+                                    <Border WidthRequest="46" HeightRequest="46" StrokeShape="Ellipse" StrokeThickness="0"
+                                            BackgroundColor="{StaticResource Parchment}" VerticalOptions="Start">
                                         <Label Text="{Binding Monogram}" FontFamily="{StaticResource SerifFont}" FontAttributes="Bold" FontSize="15"
-                                               TextColor="{StaticResource Gold}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                               TextColor="{StaticResource Ink}" HorizontalOptions="Center" VerticalOptions="Center" />
                                     </Border>
                                     <VerticalStackLayout Grid.Column="1" Spacing="2">
                                         <Label Text="{Binding Category, StringFormat='{0}'}" Style="{StaticResource Overline}" FontSize="10" />
@@ -84,7 +84,7 @@
                         <Border Style="{StaticResource Card}">
                             <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="10">
                                 <Label Text="{Binding TermLength, StringFormat='{0:0}'}" FontFamily="{StaticResource SerifFont}" FontSize="40"
-                                       FontAttributes="Bold" TextColor="{StaticResource Navy}" VerticalOptions="Center" />
+                                       FontAttributes="Bold" TextColor="{StaticResource Ink}" VerticalOptions="Center" />
                                 <Stepper Grid.Column="1" Minimum="1" Maximum="99" Increment="1" Value="{Binding TermLength}" VerticalOptions="Center" />
                                 <Border Grid.Row="1" Grid.ColumnSpan="2" Style="{StaticResource InputFrame}">
                                     <Picker Title="Unit" ItemsSource="{Binding TermUnits}" SelectedIndex="{Binding TermUnitIndex}" />
@@ -92,7 +92,7 @@
                             </Grid>
                         </Border>
 
-                        <Border Style="{StaticResource Card}" BackgroundColor="#FBF7EE" Stroke="{StaticResource GoldLight}">
+                        <Border Style="{StaticResource Card}" BackgroundColor="{StaticResource Paper}">
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="SELECTED TERM" Style="{StaticResource Overline}" />
                                 <Label Text="{Binding TermDescription}" Style="{StaticResource CardTitle}" />
@@ -111,7 +111,7 @@
                                 <DataTrigger TargetType="Border" Binding="{Binding SurvivesExpiration}" Value="True">
                                     <Setter Property="Stroke" Value="{StaticResource Gold}" />
                                     <Setter Property="StrokeThickness" Value="2" />
-                                    <Setter Property="BackgroundColor" Value="#FBF7EE" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource Paper}" />
                                 </DataTrigger>
                             </Border.Triggers>
                             <VerticalStackLayout Spacing="6">
@@ -128,7 +128,7 @@
                                 <DataTrigger TargetType="Border" Binding="{Binding SurvivesExpiration}" Value="False">
                                     <Setter Property="Stroke" Value="{StaticResource Gold}" />
                                     <Setter Property="StrokeThickness" Value="2" />
-                                    <Setter Property="BackgroundColor" Value="#FBF7EE" />
+                                    <Setter Property="BackgroundColor" Value="{StaticResource Paper}" />
                                 </DataTrigger>
                             </Border.Triggers>
                             <VerticalStackLayout Spacing="6">
@@ -198,7 +198,7 @@
                         <HorizontalStackLayout>
                             <Button Text="Today" Style="{StaticResource ChipButton}" Command="{Binding SetTodayCommand}" />
                         </HorizontalStackLayout>
-                        <Border Style="{StaticResource Card}" BackgroundColor="#FBF7EE" Stroke="{StaticResource GoldLight}">
+                        <Border Style="{StaticResource Card}" BackgroundColor="{StaticResource Paper}">
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="TERM" Style="{StaticResource Overline}" />
                                 <Label Text="{Binding TermDescription}" Style="{StaticResource CardTitle}" />
@@ -240,7 +240,7 @@
         </Grid>
 
         <!-- Footer -->
-        <VerticalStackLayout Grid.Row="2" BackgroundColor="{StaticResource Paper}" Padding="16,10,16,16" Spacing="8">
+        <VerticalStackLayout Grid.Row="2" BackgroundColor="{StaticResource Parchment}" Padding="16,10,16,16" Spacing="8">
             <BoxView Style="{StaticResource Divider}" Margin="-16,-10,-16,0" />
             <Label Text="{Binding ErrorMessage}" TextColor="{StaticResource Danger}" FontSize="13"
                    IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNull}}" />

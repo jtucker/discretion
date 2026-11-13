@@ -5,9 +5,9 @@
        xmlns:views="clr-namespace:Discretion.Views"
        Title="Discretion"
        Shell.FlyoutBehavior="Disabled"
-       Shell.BackgroundColor="{StaticResource Navy}"
-       Shell.ForegroundColor="White"
-       Shell.TitleColor="White">
+       Shell.BackgroundColor="{StaticResource Parchment}"
+       Shell.ForegroundColor="{StaticResource Ink}"
+       Shell.TitleColor="{StaticResource Ink}">
 
     <ShellContent Title="Discretion"
                   ContentTemplate="{DataTemplate views:DashboardPage}"

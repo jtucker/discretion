@@ -13,32 +13,32 @@
 
     <Grid RowDefinitions="Auto,*">
         <!-- Masthead -->
-        <Grid BackgroundColor="{StaticResource Navy}" Padding="20,8,20,24" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="4">
+        <Grid BackgroundColor="{StaticResource Parchment}" Padding="20,14,20,20" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="4">
             <HorizontalStackLayout Spacing="12">
-                <Border WidthRequest="44" HeightRequest="44" StrokeShape="Ellipse" Stroke="{StaticResource Gold}" StrokeThickness="1.5"
-                        BackgroundColor="Transparent">
-                    <Label Text="D" FontFamily="{StaticResource SerifFont}" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Gold}"
+                <Border WidthRequest="44" HeightRequest="44" StrokeShape="Ellipse" StrokeThickness="0"
+                        BackgroundColor="{StaticResource Navy}">
+                    <Label Text="D" FontFamily="{StaticResource SerifFont}" FontSize="20" FontAttributes="Bold" TextColor="{StaticResource Paper}"
                            HorizontalOptions="Center" VerticalOptions="Center" />
                 </Border>
                 <VerticalStackLayout VerticalOptions="Center">
-                    <Label Text="DISCRETION" FontFamily="{StaticResource SerifFont}" FontSize="20" FontAttributes="Bold"
-                           TextColor="White" CharacterSpacing="3" />
-                    <Label Text="Confidentiality Agreements" FontSize="11" TextColor="{StaticResource GoldLight}" CharacterSpacing="1" />
+                    <Label Text="DISCRETION" FontFamily="{StaticResource SerifFont}" FontSize="18" FontAttributes="Bold"
+                           TextColor="{StaticResource Ink}" CharacterSpacing="2" />
+                    <Label Text="Confidentiality Agreements" FontSize="12" TextColor="{StaticResource Muted}" />
                 </VerticalStackLayout>
             </HorizontalStackLayout>
-            <Label Grid.Row="1" Text="{Binding Greeting}" TextColor="{StaticResource GoldLight}" FontSize="13" Margin="0,18,0,0" />
+            <Label Grid.Row="1" Text="{Binding Greeting}" Style="{StaticResource Display}" FontSize="26" Margin="0,22,0,0" />
 
             <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,10,0,14">
-                <Border StrokeShape="RoundRectangle 10" Stroke="{StaticResource NavyLight}" BackgroundColor="{StaticResource NavyLight}" Padding="14,10">
+                <Border Style="{StaticResource Card}" Padding="16,12">
                     <VerticalStackLayout>
-                        <Label Text="{Binding PendingCount}" FontFamily="{StaticResource SerifFont}" FontSize="26" FontAttributes="Bold" TextColor="White" />
-                        <Label Text="Awaiting signature" FontSize="12" TextColor="{StaticResource GoldLight}" />
+                        <Label Text="{Binding PendingCount}" FontFamily="{StaticResource SerifFont}" FontSize="26" FontAttributes="Bold" TextColor="{StaticResource Ink}" />
+                        <Label Text="Awaiting signature" FontSize="12" TextColor="{StaticResource Muted}" />
                     </VerticalStackLayout>
                 </Border>
-                <Border Grid.Column="1" StrokeShape="RoundRectangle 10" Stroke="{StaticResource NavyLight}" BackgroundColor="{StaticResource NavyLight}" Padding="14,10">
+                <Border Grid.Column="1" Style="{StaticResource Card}" Padding="16,12">
                     <VerticalStackLayout>
-                        <Label Text="{Binding ExecutedCount}" FontFamily="{StaticResource SerifFont}" FontSize="26" FontAttributes="Bold" TextColor="White" />
-                        <Label Text="Fully executed" FontSize="12" TextColor="{StaticResource GoldLight}" />
+                        <Label Text="{Binding ExecutedCount}" FontFamily="{StaticResource SerifFont}" FontSize="26" FontAttributes="Bold" TextColor="{StaticResource Ink}" />
+                        <Label Text="Fully executed" FontSize="12" TextColor="{StaticResource Muted}" />
                     </VerticalStackLayout>
                 </Border>
             </Grid>
@@ -50,7 +50,7 @@
         <!-- Agreement register -->
         <CollectionView Grid.Row="1" ItemsSource="{Binding Agreements}" SelectionMode="None" Margin="16,0">
             <CollectionView.Header>
-                <Label Text="AGREEMENT REGISTER" Style="{StaticResource Overline}" Margin="4,20,0,10" />
+                <Label Text="AGREEMENT REGISTER" Style="{StaticResource Overline}" Margin="4,18,0,10" />
             </CollectionView.Header>
             <CollectionView.EmptyView>
                 <VerticalStackLayout Padding="24,40" Spacing="8">
@@ -61,7 +61,7 @@
             </CollectionView.EmptyView>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="models:Agreement">
-                    <Border Style="{StaticResource Card}" Margin="0,0,0,10" Padding="16,14">
+                    <Border Style="{StaticResource Card}" Margin="0,0,0,10" Padding="18,16">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding OpenCommand, Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, x:DataType=vm:DashboardViewModel}"
                                                   CommandParameter="{Binding .}" />
