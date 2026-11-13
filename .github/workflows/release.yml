@@ -1,0 +1,123 @@
+name: Release
+
+# Conventional Commits on main determine the next version. Both apps must build before semantic-release
+# creates the tag and publishes the GitHub release. See "CI/CD & releasing" in the README.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build the next release, if any, without creating a tag or release
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# Only one release runs at a time, so that two runs cannot pick the same version.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  version:
+    name: Determine next release
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # semantic-release checks push permission even during a dry run.
+    permissions:
+      contents: write
+    outputs:
+      version: ${{ steps.release.outputs.new_release_version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Preview the release
+        id: release
+        uses: cycjimmy/semantic-release-action@v8.1.4
+        with:
+          semantic_version: 25.0.9
+          dry_run: true
+          # Preset v10 needs a newer changelog writer than semantic-release 25 provides.
+          extra_plugins: |
+            conventional-changelog-conventionalcommits@9.3.1
+            @semantic-release/exec@7.1.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+  build:
+    name: Build
+    needs: version
+    if: needs.version.outputs.version != ''
+    uses: ./.github/workflows/build.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+      build-number: ${{ github.run_number }}
+      sign-android: true
+    secrets: inherit
+
+  publish:
+    name: Publish release
+    needs: [version, build]
+    if: github.event_name != 'workflow_dispatch' || !inputs.dry_run
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      RELEASE_VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      # The uploads are not zipped, so skip-decompress keeps the macOS zip a zip.
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          pattern: Discretion-*
+          merge-multiple: true
+          skip-decompress: true
+
+      - name: Verify release artifacts
+        run: |
+          apk="dist/Discretion-${RELEASE_VERSION}-android.apk"
+          zip="dist/Discretion-${RELEASE_VERSION}-macos.zip"
+          for file in "$apk" "$zip"; do
+            if [ ! -s "$file" ]; then
+              echo "::error::$file is missing or empty"
+              exit 1
+            fi
+          done
+
+      - name: Publish the release
+        uses: cycjimmy/semantic-release-action@v8.1.4
+        with:
+          semantic_version: 25.0.9
+          extra_plugins: |
+            conventional-changelog-conventionalcommits@9.3.1
+            @semantic-release/exec@7.1.0
+        env:
+          GITHUB_TOKEN: ${{ github.token }}

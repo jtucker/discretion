@@ -27,7 +27,7 @@
 		<!-- App Identifier -->
 		<ApplicationId>com.discretion.nda</ApplicationId>
 
-		<!-- Versions -->
+		<!-- Local defaults; CI supplies the app version and build number (see README "CI/CD & releasing"). -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>1</ApplicationVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">17.0</SupportedOSPlatformVersion>

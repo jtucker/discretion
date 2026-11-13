@@ -57,3 +57,7 @@ dotnet build -t:Run -f net11.0-maccatalyst
 ```
 
 The `net11.0-maccatalyst` target is only included when building on macOS.
+
+## CI/CD & releasing
+
+See the [CI/CD and releasing guide](docs/ci-cd.md) for workflows, Conventional Commits, release artifacts, and signing setup.
