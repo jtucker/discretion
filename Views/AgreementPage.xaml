@@ -28,7 +28,7 @@
                         </Grid>
                         <Label Text="Non-Disclosure Agreement" Style="{StaticResource Caption}" />
                         <Label Text="{Binding Agreement.TemplateTitle}" Style="{StaticResource Title}" />
-                        <BoxView Style="{StaticResource Hairline}" Margin="0,8" />
+                        <BoxView Style="{StaticResource Divider}" Margin="0,8" />
                         <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="2">
                             <Label Text="EFFECTIVE" Style="{StaticResource Overline}" FontSize="10" />
                             <Label Grid.Column="1" Text="EXPIRES" Style="{StaticResource Overline}" FontSize="10" />
@@ -52,7 +52,7 @@
                         <Label Text="{Binding DisclosingStatus}" Style="{StaticResource Caption}" />
                         <Grid IsVisible="{Binding Agreement.DisclosingSignature, Converter={StaticResource IsNotNull}}" HeightRequest="70" Margin="0,6,0,0">
                             <controls:SignatureView Signature="{Binding Agreement.DisclosingSignature}" HeightRequest="60" VerticalOptions="Start" />
-                            <BoxView Style="{StaticResource Hairline}" Color="{StaticResource Navy}" VerticalOptions="End" />
+                            <BoxView Style="{StaticResource Divider}" Color="{StaticResource Navy}" VerticalOptions="End" />
                         </Grid>
                         <Button Text="Sign as Disclosing Party" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                 Command="{Binding SignDisclosingCommand}"
@@ -71,7 +71,7 @@
                         <Label Text="{Binding ReceivingStatus}" Style="{StaticResource Caption}" FontFamily="OpenSansSemibold" Margin="0,4,0,0" />
                         <Grid IsVisible="{Binding Agreement.ReceivingSignature, Converter={StaticResource IsNotNull}}" HeightRequest="70" Margin="0,6,0,0">
                             <controls:SignatureView Signature="{Binding Agreement.ReceivingSignature}" HeightRequest="60" VerticalOptions="Start" />
-                            <BoxView Style="{StaticResource Hairline}" Color="{StaticResource Navy}" VerticalOptions="End" />
+                            <BoxView Style="{StaticResource Divider}" Color="{StaticResource Navy}" VerticalOptions="End" />
                         </Grid>
                         <Button Text="Sign as Receiving Party" Style="{StaticResource PrimaryButton}" Margin="0,8,0,0"
                                 Command="{Binding SignReceivingCommand}"

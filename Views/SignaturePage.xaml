@@ -31,7 +31,7 @@
                            HorizontalOptions="Center" VerticalOptions="Center" FontSize="16" Opacity="0.6" />
                     <Label Text="X" FontFamily="{StaticResource SerifFont}" FontSize="22" TextColor="{StaticResource Muted}"
                            Margin="16,0,0,30" VerticalOptions="End" />
-                    <BoxView Style="{StaticResource Hairline}" Color="{StaticResource Navy}" Margin="16,0,16,30" VerticalOptions="End" />
+                    <BoxView Style="{StaticResource Divider}" Color="{StaticResource Navy}" Margin="16,0,16,30" VerticalOptions="End" />
                     <controls:SignaturePad x:Name="Pad" SignatureChanged="OnSignatureChanged" />
                 </Grid>
             </Border>
