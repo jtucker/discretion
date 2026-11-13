@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**/*.md'
+      - LICENSE
+      - .gitignore
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**/*.md'
+      - LICENSE
+      - .gitignore
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A newer push to the same branch or pull request supersedes the running build (macOS minutes are expensive).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scripts:
+    name: Version script tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Run the tests
+        run: .github/scripts/test-resolve-version.sh
+
+  build:
+    name: Build
+    uses: ./.github/workflows/build.yml
+    with:
+      version: 0.0.0-ci.${{ github.run_number }}
+      build-number: ${{ github.run_number }}
+      retention-days: 3

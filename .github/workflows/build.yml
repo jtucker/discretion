@@ -1,0 +1,253 @@
+# Reusable workflow that builds the Android APK and the macOS (Mac Catalyst) app.
+# Called by ci.yml (snapshot builds) and release.yml (versioned release builds).
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: Semantic version stamped into the apps, e.g. 1.2.3 or 1.2.3-rc.1
+        type: string
+        required: true
+      build-number:
+        description: Whole number that increases with every build (Android versionCode, macOS CFBundleVersion)
+        type: string
+        required: true
+      sign-android:
+        description: Sign the APK with the ANDROID_* secrets instead of a throwaway debug key
+        type: boolean
+        default: false
+      retention-days:
+        description: How long the uploaded build artifacts are kept
+        type: number
+        default: 7
+    secrets:
+      ANDROID_KEYSTORE_BASE64:
+        description: Release keystore, base64 encoded
+        required: false
+      ANDROID_KEYSTORE_PASSWORD:
+        description: Password of the keystore
+        required: false
+      ANDROID_KEY_ALIAS:
+        description: Alias of the signing key in the keystore
+        required: false
+      ANDROID_KEY_PASSWORD:
+        description: Password of the signing key (defaults to ANDROID_KEYSTORE_PASSWORD)
+        required: false
+
+permissions:
+  contents: read
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  android:
+    name: Android APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      VERSION: ${{ inputs.version }}
+      BUILD_NUMBER: ${{ inputs.build-number }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 11.0.x
+
+      - name: Install the MAUI Android workload
+        run: dotnet workload install maui-android
+
+      - name: Decode the release keystore
+        id: keystore
+        if: inputs.sign-android
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning title=APK is not release-signed::ANDROID_KEYSTORE_BASE64 is not set, so the APK is signed with a throwaway debug key. Devices that have an APK with a different signature installed must uninstall it first, which deletes the app data. See the README (CI/CD & releasing)."
+            exit 0
+          fi
+          keystore="$RUNNER_TEMP/release.keystore"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$keystore"
+          echo "path=$keystore" >> "$GITHUB_OUTPUT"
+
+      - name: Publish the APK
+        env:
+          KEYSTORE_PATH: ${{ steps.keystore.outputs.path }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          # PKCS12 keystores (the default since JDK 9) use the keystore password for the key as well
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD || secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          args=(
+            -f net11.0-android
+            -c Release
+            -p:AndroidPackageFormat=apk
+            -p:ApplicationDisplayVersion="$VERSION"
+            -p:ApplicationVersion="$BUILD_NUMBER"
+          )
+          if [ -n "$KEYSTORE_PATH" ]; then
+            : "${ANDROID_KEY_ALIAS:?Set the ANDROID_KEY_ALIAS secret}"
+            : "${ANDROID_KEYSTORE_PASSWORD:?Set the ANDROID_KEYSTORE_PASSWORD secret}"
+            args+=(
+              -p:AndroidKeyStore=true
+              -p:AndroidSigningKeyStore="$KEYSTORE_PATH"
+              -p:AndroidSigningKeyAlias="$ANDROID_KEY_ALIAS"
+              -p:AndroidSigningKeyPass=env:ANDROID_KEY_PASSWORD
+              -p:AndroidSigningStorePass=env:ANDROID_KEYSTORE_PASSWORD
+            )
+          fi
+          dotnet publish Discretion.csproj "${args[@]}"
+
+      - name: Stage and verify the APK
+        run: |
+          shopt -s nullglob
+          apks=(bin/Release/net11.0-android/publish/*-Signed.apk)
+          if [ "${#apks[@]}" -ne 1 ]; then
+            echo "::error::Expected exactly one signed APK, found ${#apks[@]}"
+            exit 1
+          fi
+          mkdir dist
+          apk="dist/Discretion-${VERSION}-android.apk"
+          cp "${apks[0]}" "$apk"
+
+          build_tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
+          signer=$("$build_tools/apksigner" verify --print-certs "$apk" | sed -n -E 's/^(Signer #[0-9]+|V[0-9.]+ Signer): certificate DN: //p' | head -n 1)
+          badging=$("$build_tools/aapt2" dump badging "$apk" | sed -n 's/^package: //p')
+          echo "$badging"
+          case $badging in
+            *"versionCode='$BUILD_NUMBER' versionName='$VERSION'"*) ;;
+            *)
+              echo "::error::The APK does not carry version $VERSION (build $BUILD_NUMBER)"
+              exit 1
+              ;;
+          esac
+          {
+            echo "### Android APK"
+            echo "- \`$(basename "$apk")\` ($(du -h "$apk" | awk '{print $1}'))"
+            echo "- Signed by \`$signer\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove the keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/release.keystore"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          path: dist/Discretion-${{ inputs.version }}-android.apk
+          archive: false
+          if-no-files-found: error
+          retention-days: ${{ inputs.retention-days }}
+
+  macos:
+    name: macOS app
+    # The .NET 11 Mac Catalyst SDK needs Xcode 27.2, which macos-latest (Xcode 26) does not have. The xcode-27
+    # image (Apple silicon only) does. Switch to macos-latest once that ships Xcode 27.
+    runs-on: xcode-27
+    timeout-minutes: 30
+    env:
+      VERSION: ${{ inputs.version }}
+      BUILD_NUMBER: ${{ inputs.build-number }}
+      XCODE_VERSION: '27.2'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Select Xcode ${{ env.XCODE_VERSION }}
+        run: |
+          sudo xcode-select -s "/Applications/Xcode_${XCODE_VERSION}.app"
+          xcodebuild -version
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 11.0.x
+
+      # The project also targets Android when it is evaluated on macOS, so that workload is needed to restore it.
+      - name: Install the MAUI workloads
+        run: dotnet workload install maui-maccatalyst maui-android
+
+      - name: Publish the app
+        # The prerelease suffix is dropped because CFBundleShortVersionString only allows MAJOR.MINOR.PATCH;
+        # the full version is in the zip file name and the release.
+        # AllowReadyToRunWithoutRuntimeIdentifier works around NETSDK1191, which the universal (x64 + arm64)
+        # Release build otherwise hits when publishing.
+        run: |
+          dotnet publish Discretion.csproj \
+            -f net11.0-maccatalyst \
+            -c Release \
+            -p:CreatePackage=false \
+            -p:AllowReadyToRunWithoutRuntimeIdentifier=true \
+            -p:ApplicationDisplayVersion="${VERSION%%-*}" \
+            -p:ApplicationVersion="$BUILD_NUMBER"
+
+      - name: Package and verify the app
+        run: |
+          # Besides one bundle per architecture, publishing merges them into a universal app in a folder named
+          # after the build machine's runtime identifier (osx-arm64 on Apple silicon).
+          shopt -s nullglob
+          apps=()
+          for app in bin/Release/net11.0-maccatalyst/*/Discretion.app; do
+            case $app in
+              */maccatalyst-*/*) ;;
+              *) apps+=("$app") ;;
+            esac
+          done
+          if [ "${#apps[@]}" -ne 1 ]; then
+            echo "::error::Expected exactly one universal Discretion.app, found ${#apps[@]}"
+            find bin/Release/net11.0-maccatalyst -maxdepth 2
+            exit 1
+          fi
+          app=${apps[0]}
+          plist="$app/Contents/Info.plist"
+
+          archs=$(lipo -archs "$app/Contents/MacOS/$(plutil -extract CFBundleExecutable raw -o - "$plist")")
+          if [[ $archs != *x86_64* || $archs != *arm64* ]]; then
+            echo "::error::Expected a universal app (x86_64 and arm64), got: $archs"
+            exit 1
+          fi
+          short_version=$(plutil -extract CFBundleShortVersionString raw -o - "$plist")
+          bundle_version=$(plutil -extract CFBundleVersion raw -o - "$plist")
+          if [ "$short_version" != "${VERSION%%-*}" ] || [ "$bundle_version" != "$BUILD_NUMBER" ]; then
+            echo "::error::The app carries version $short_version ($bundle_version), expected ${VERSION%%-*} ($BUILD_NUMBER)"
+            exit 1
+          fi
+          codesign --verify --deep --strict "$app"
+
+          mkdir dist
+          zip="dist/Discretion-${VERSION}-macos.zip"
+          ditto -c -k --keepParent "$app" "$zip"
+
+          # Make sure the shipped zip still contains an intact bundle
+          extracted=$(mktemp -d)
+          ditto -x -k "$zip" "$extracted"
+          codesign --verify --deep --strict "$extracted/Discretion.app"
+          rm -rf "$extracted"
+
+          {
+            echo "### macOS app"
+            echo "- \`$(basename "$zip")\` ($(du -h "$zip" | awk '{print $1}'))"
+            echo "- Architectures: $archs"
+            echo "- Version $short_version ($bundle_version), ad-hoc signed and not notarized"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          path: dist/Discretion-${{ inputs.version }}-macos.zip
+          archive: false
+          if-no-files-found: error
+          retention-days: ${{ inputs.retention-days }}

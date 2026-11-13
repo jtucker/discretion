@@ -1,0 +1,171 @@
+name: Release
+
+# Publishes a GitHub release with the Android APK and the macOS app.
+#
+# Either push a tag such as v1.2.3 or v1.3.0-rc.1, or run this workflow by hand and let it pick the next
+# version and create the tag itself. See "CI/CD & releasing" in the README.
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Part of the latest stable version to increment
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+      prerelease:
+        description: Optional prerelease label such as rc.1, which makes the release a prerelease
+        type: string
+        required: false
+      dry_run:
+        description: Only build and verify, without creating a tag or release
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+# Only one release runs at a time, so that two runs cannot pick the same version.
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  version:
+    name: Resolve version
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.resolve.outputs.version }}
+      tag: ${{ steps.resolve.outputs.tag }}
+      prerelease: ${{ steps.resolve.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Resolve the version
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          REF_NAME: ${{ github.ref_name }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          BUMP: ${{ inputs.bump }}
+          PRERELEASE_LABEL: ${{ inputs.prerelease }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          script=.github/scripts/resolve-version.sh
+
+          if [ "$EVENT_NAME" = push ]; then
+            if ! version=$("$script" tag "$REF_NAME"); then
+              echo "::error::Tag $REF_NAME is not a valid semantic version tag"
+              exit 1
+            fi
+          else
+            if [ "$DRY_RUN" != true ] && [ "$REF_NAME" != "$DEFAULT_BRANCH" ]; then
+              echo "::error::Releases are created from $DEFAULT_BRANCH. Run the workflow on that branch, or tick dry_run."
+              exit 1
+            fi
+            if ! version=$(
+              gh api --paginate "repos/$GITHUB_REPOSITORY/git/matching-refs/tags/v" --jq '.[].ref | ltrimstr("refs/tags/")' |
+                "$script" bump "$BUMP" ${PRERELEASE_LABEL:+"$PRERELEASE_LABEL"}
+            ); then
+              echo "::error::Could not work out the next version, see the log above"
+              exit 1
+            fi
+          fi
+
+          prerelease=false
+          case $version in
+            *-*) prerelease=true ;;
+          esac
+
+          {
+            echo "version=$version"
+            echo "tag=v$version"
+            echo "prerelease=$prerelease"
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo "## Release $version"
+            if [ "$EVENT_NAME" = workflow_dispatch ] && [ "$DRY_RUN" = true ]; then
+              echo "Dry run: the apps are built and verified, but no tag or release is created."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build:
+    name: Build
+    needs: version
+    uses: ./.github/workflows/build.yml
+    with:
+      version: ${{ needs.version.outputs.version }}
+      build-number: ${{ github.run_number }}
+      sign-android: true
+    secrets: inherit
+
+  publish:
+    name: Publish release
+    needs: [version, build]
+    if: github.event_name != 'workflow_dispatch' || !inputs.dry_run
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      EVENT_NAME: ${{ github.event_name }}
+      VERSION: ${{ needs.version.outputs.version }}
+      TAG: ${{ needs.version.outputs.tag }}
+      PRERELEASE: ${{ needs.version.outputs.prerelease }}
+    steps:
+      # The uploads are not zipped, so skip-decompress keeps the macOS zip a zip.
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          pattern: Discretion-*
+          merge-multiple: true
+          skip-decompress: true
+
+      - name: Create the release
+        run: |
+          apk="dist/Discretion-${VERSION}-android.apk"
+          zip="dist/Discretion-${VERSION}-macos.zip"
+          ls -l dist
+          for file in "$apk" "$zip"; do
+            if [ ! -s "$file" ]; then
+              echo "::error::$file is missing or empty"
+              exit 1
+            fi
+          done
+
+          notes="$RUNNER_TEMP/release-notes.md"
+          cat > "$notes" <<'EOF'
+          ## Installing
+
+          **Android** (7.0 or later): open the `.apk` on the device and, if asked, allow installing apps from that source (your browser or file manager).
+
+          **macOS** (14 Sonoma or later, Apple silicon and Intel): unzip the `.zip` and move `Discretion.app` to Applications. The app is not notarized, so macOS blocks the first launch. Open System Settings > Privacy & Security and choose **Open Anyway**, or run `xattr -dr com.apple.quarantine /Applications/Discretion.app`.
+          EOF
+
+          args=("$TAG" "$apk" "$zip" --title "Discretion $VERSION" --notes-file "$notes" --generate-notes)
+          if [ "$PRERELEASE" = true ]; then
+            args+=(--prerelease)
+          fi
+          if [ "$EVENT_NAME" = push ]; then
+            args+=(--verify-tag)
+          else
+            # Creates the tag at the commit that was built, and only once the release is published
+            args+=(--target "$GITHUB_SHA")
+          fi
+
+          url=$(gh release create "${args[@]}")
+          echo "Published $url"
+          echo "### Released [$TAG]($url)" >> "$GITHUB_STEP_SUMMARY"
