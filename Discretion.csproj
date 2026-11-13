@@ -32,6 +32,9 @@
 		<ApplicationVersion>1</ApplicationVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">17.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
+
+		<!-- Let MAUI tint the Android status bar to match the Shell/page chrome and pick legible icons -->
+		<MauiAndroidSystemBarsUseMauiChrome Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">true</MauiAndroidSystemBarsUseMauiChrome>
 	</PropertyGroup>
 
 	<ItemGroup>
