@@ -5,6 +5,18 @@ Non-Disclosure Agreement about matters such as karaoke performances, restroom in
 
 > For entertainment purposes only. Generated documents are not legal advice.
 
+## Demo
+
+<p align="center">
+  <img src="docs/demo.gif" alt="Screencast: saving the Disclosing Party's details, then creating, signing and executing a Post-Extramarital Affair NDA on Android" width="300">
+</p>
+
+Recorded on Android: set up *Your Details* (Disclosing Party: Jordan Huang), then create a Post-Extramarital Affair NDA
+for Alice Huang, sign it for both parties on the device and open the executed agreement.
+[Full-quality video (MP4)](docs/demo.mp4)
+
+All names, contact details and signatures shown are fictional.
+
 ## Workflow
 
 1. **Create New NDA** (first run asks for *Your Details*, used as the Disclosing Party)
