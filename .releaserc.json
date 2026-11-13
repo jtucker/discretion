@@ -1,0 +1,28 @@
+{
+  "branches": ["main"],
+  "tagFormat": "v${version}",
+  "plugins": [
+    ["@semantic-release/commit-analyzer", { "preset": "conventionalcommits" }],
+    ["@semantic-release/release-notes-generator", { "preset": "conventionalcommits" }],
+    [
+      "@semantic-release/exec",
+      {
+        "prepareCmd": "test \"$RELEASE_VERSION\" = '${nextRelease.version}' || { echo 'Release version changed since the apps were built; rerun the release workflow.' >&2; exit 1; }"
+      }
+    ],
+    [
+      "@semantic-release/github",
+      {
+        "assets": [
+          { "path": "dist/Discretion-*-android.apk", "label": "Android APK" },
+          { "path": "dist/Discretion-*-macos.zip", "label": "macOS app (Apple silicon and Intel)" }
+        ],
+        "releaseNameTemplate": "Discretion ${nextRelease.version}",
+        "releaseBodyTemplate": "${nextRelease.notes}\n\n## Installing\n\n**Android** (7.0 or later): open the `.apk` on the device and, if asked, allow installing apps from that source (your browser or file manager).\n\n**macOS** (14 Sonoma or later, Apple silicon and Intel): unzip the `.zip` and move `Discretion.app` to Applications. The app is not notarized, so macOS blocks the first launch. Open System Settings > Privacy & Security and choose **Open Anyway**, or run `xattr -dr com.apple.quarantine /Applications/Discretion.app`.",
+        "successCommentCondition": false,
+        "failCommentCondition": false,
+        "releasedLabels": false
+      }
+    ]
+  ]
+}

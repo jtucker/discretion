@@ -65,34 +65,41 @@ GitHub Actions workflows live in `.github/workflows/`:
 | Workflow | Triggered by | Does |
 | --- | --- | --- |
 | `ci.yml` | pull requests, pushes to `main` | Builds the Android APK and the macOS app as `0.0.0-ci.<run>` snapshots, kept for 3 days as workflow artifacts. Docs-only changes are skipped |
-| `release.yml` | a `v*` tag push, or a manual run | Builds both apps at a semantic version and publishes them as a GitHub release |
+| `release.yml` | pushes to `main`, or a manual run on `main` | Uses semantic-release to determine the next version from commits, build both apps, and publish a GitHub release |
 | `build.yml` | the two above | The shared build: publish, check the version, signature and architectures, upload |
 
 ### Releasing
 
-Versions follow [Semantic Versioning](https://semver.org): `MAJOR.MINOR.PATCH`, optionally with a prerelease label such
-as `1.4.0-rc.1`. The git tag (`v1.4.0`) is the source of truth, and every release carries two assets:
+The [semantic-release action](https://github.com/cycjimmy/semantic-release-action) manages versions, release notes, git
+tags and GitHub releases automatically. Configuration lives in `.releaserc.json`; this is an app release, not an npm
+package, so no npm publishing or npm token is needed. The workflow uses GitHub's built-in `GITHUB_TOKEN`.
+
+Use [Conventional Commits](https://www.conventionalcommits.org/) for commits merged into `main` (or the PR title when
+squash-merging). semantic-release examines all commits since the last release and selects the largest required bump:
+
+| Commit | Version change |
+| --- | --- |
+| `fix: correct signature export` or `perf: speed up PDF rendering` | Patch (`1.2.3` -> `1.2.4`) |
+| `feat: add a new agreement template` | Minor (`1.2.3` -> `1.3.0`) |
+| `feat!: change the agreement format`, or a `BREAKING CHANGE:` footer | Major (`1.2.3` -> `2.0.0`) |
+| `docs:`, `chore:`, `ci:`, `test:`, or other non-releasing commits without a breaking change | No release |
+
+The first releasable commit produces `v1.0.0`. Only stable releases from `main` are configured; don't create release tags
+manually. If there are no releasable changes, the release builds and publishing are skipped.
+
+The workflow first previews the next version without publishing, stamps it into both apps, and only then runs
+semantic-release to create the tag and release. A guard prevents publishing if the version changes while the builds
+are running. Every release carries two assets:
 
 - `Discretion-<version>-android.apk`
 - `Discretion-<version>-macos.zip` (a universal app for Apple silicon and Intel)
 
-Either let the workflow pick the next version (run it on `main`; the tag is only created once both builds pass):
+For a manual run using the same commit-based versioning:
 
 ```bash
-gh workflow run release.yml -f bump=minor                       # 1.2.3 -> 1.3.0
-gh workflow run release.yml -f bump=patch -f prerelease=rc.1    # 1.2.3 -> 1.2.4-rc.1
-gh workflow run release.yml -f bump=major -f dry_run=true       # build and verify, publish nothing
+gh workflow run release.yml --ref main                     # release if there are unreleased changes
+gh workflow run release.yml --ref main -f dry_run=true      # build the next version, publish nothing
 ```
-
-or push the tag yourself:
-
-```bash
-git tag v1.3.0 && git push origin v1.3.0
-```
-
-`bump` increments the highest stable `vX.Y.Z` tag, counting from `0.0.0` when there is none, so the first release is
-`0.0.1`, `0.1.0` or `1.0.0` depending on the bump (or push `v1.0.0` yourself). Prereleases never move that base, so
-`rc.1`, `rc.2` and the final release share one version. Prereleases are flagged as such on GitHub.
 
 The version is stamped into the apps at build time, so the `1.0` / `1` placeholders in `Discretion.csproj` only matter
 for local builds. Android gets `versionName` = the full version and `versionCode` = the workflow run number; macOS gets

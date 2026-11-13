@@ -23,18 +23,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  scripts:
-    name: Version script tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          persist-credentials: false
-
-      - name: Run the tests
-        run: .github/scripts/test-resolve-version.sh
-
   build:
     name: Build
     uses: ./.github/workflows/build.yml
